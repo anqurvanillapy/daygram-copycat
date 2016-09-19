@@ -3,17 +3,20 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#f2f1ed">
 
     <ListView
         android:id="@+id/entryListView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/bottomBar" />
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:layout_alignParentTop="true" />
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="50sp"
+        android:layout_height="50dp"
         android:textAlignment="center"
         android:id="@+id/bottomBar"
         android:background="#fff"
@@ -27,37 +30,37 @@
             android:gravity="center_vertical|center_horizontal">
 
             <RelativeLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.03"
                 android:background="#000"
                 android:id="@+id/buttonEntry"
                 android:layout_marginBottom="16dp"
                 android:layout_marginTop="16dp"
-                android:layout_marginLeft="10sp"></RelativeLayout>
+                android:layout_marginLeft="10dp"
+                android:layout_weight="3.93"></RelativeLayout>
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="SEPTEMBER"
+                android:text="OCTOBER"
                 android:id="@+id/labelMonth"
                 android:textSize="18sp"
                 android:textIsSelectable="false"
                 android:textColor="#000"
                 android:fontFamily="sans-serif-condensed"
-                android:layout_weight="0.1"
                 android:textStyle="bold"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:layout_weight="3.2" />
 
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
                 android:background="#000"
-                android:layout_marginTop="16sp"
-                android:layout_marginBottom="16sp" />
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp" />
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="2016"
                 android:id="@+id/labelYear"
@@ -66,18 +69,18 @@
                 android:textIsSelectable="false"
                 android:textColor="#000"
                 android:fontFamily="sans-serif-condensed"
-                android:layout_weight="0.1"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:layout_weight="3.5" />
 
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
                 android:background="#000"
-                android:layout_marginTop="16sp"
-                android:layout_marginBottom="16sp" />
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp" />
 
             <TextView
-                android:layout_width="20dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/add_entry"
                 android:id="@+id/buttonTodayEntry"
@@ -85,45 +88,45 @@
                 android:layout_centerHorizontal="true"
                 android:clickable="true"
                 android:textSize="30sp"
-                android:layout_weight=".2"
                 android:textIsSelectable="false"
                 android:textStyle="bold"
                 android:textColor="#000"
                 android:contextClickable="true"
-                android:textAlignment="center" />
+                android:textAlignment="center"
+                android:layout_weight="3.5" />
 
             <View
                 android:layout_width="1dp"
                 android:layout_height="match_parent"
                 android:background="#000"
-                android:layout_marginTop="16sp"
-                android:layout_marginBottom="16sp" />
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp" />
 
             <RelativeLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="0.6"
                 android:id="@+id/buttonMonthly"
-                android:layout_marginTop="16sp"
-                android:layout_marginLeft="10sp"
-                android:layout_marginRight="10sp"
+                android:layout_marginTop="16dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginRight="10dp"
                 android:gravity="center_vertical|center_horizontal"
-                android:layout_marginBottom="16sp"
+                android:layout_marginBottom="16dp"
                 android:background="#000"
                 android:contextClickable="true"
-                android:clickable="true"></RelativeLayout>
+                android:clickable="true"
+                android:layout_weight="3"></RelativeLayout>
 
             <RelativeLayout
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight=".3"
-                android:layout_marginRight="10sp"
-                android:layout_marginTop="16sp"
-                android:layout_marginBottom="16sp"
+                android:layout_marginRight="10dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:background="#ccc"
                 android:clickable="true"
                 android:contextClickable="true"
-                android:id="@+id/buttonRandom"></RelativeLayout>
+                android:id="@+id/buttonRandom"
+                android:layout_weight="3.5"></RelativeLayout>
         </LinearLayout>
     </RelativeLayout>
 </RelativeLayout>
