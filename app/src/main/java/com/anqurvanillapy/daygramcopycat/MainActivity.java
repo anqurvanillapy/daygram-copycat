@@ -184,6 +184,15 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<EntryItem> entryItems = new ArrayList<>();
         entryItems.add(new EntryItem(EntryItemType.EMPTY, new EntryEmptyObject("WTF")));
         entryItems.add(new EntryItem(EntryItemType.NONEMPTY, new EntryNonemptyObject("Fuck")));
+        entryItems.add(new EntryItem(EntryItemType.NONEMPTY, new EntryNonemptyObject("Fuck")));
+        entryItems.add(new EntryItem(EntryItemType.NONEMPTY, new EntryNonemptyObject("Fuck")));
+        entryItems.add(new EntryItem(EntryItemType.EMPTY, new EntryEmptyObject("WTF")));
+        entryItems.add(new EntryItem(EntryItemType.EMPTY, new EntryEmptyObject("WTF")));
+        entryItems.add(new EntryItem(EntryItemType.NONEMPTY, new EntryNonemptyObject("Fuck")));
+        entryItems.add(new EntryItem(EntryItemType.NONEMPTY, new EntryNonemptyObject("Fuck")));
+        entryItems.add(new EntryItem(EntryItemType.NONEMPTY, new EntryNonemptyObject("Fuck")));
+        entryItems.add(new EntryItem(EntryItemType.NONEMPTY, new EntryNonemptyObject("Fuck")));
+        entryItems.add(new EntryItem(EntryItemType.NONEMPTY, new EntryNonemptyObject("Fuck")));
 
         EntryAdapter entryAdapter = new EntryAdapter(this, entryItems);
         ListView entryListView = (ListView) findViewById(R.id.entryListView);
@@ -192,9 +201,9 @@ public class MainActivity extends AppCompatActivity {
         final TextView buttonTodayEntry = (TextView) findViewById(R.id.buttonTodayEntry);
         buttonTodayEntry.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                Intent intentTodayEntry = new Intent(MainActivity.this, TodayEntryActivity.class);
-                intentTodayEntry.putExtra("date", "oh shit");
-                MainActivity.this.startActivity(intentTodayEntry);
+                Intent intentEntryEditor = new Intent(MainActivity.this, EntryEditorActivity.class);
+                intentEntryEditor.putExtra("date", "oh shit");
+                MainActivity.this.startActivity(intentEntryEditor);
             }
         });
 
