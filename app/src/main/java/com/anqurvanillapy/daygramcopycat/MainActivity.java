@@ -2,6 +2,7 @@ package com.anqurvanillapy.daygramcopycat;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -187,6 +188,15 @@ public class MainActivity extends AppCompatActivity {
         EntryAdapter entryAdapter = new EntryAdapter(this, entryItems);
         ListView entryListView = (ListView) findViewById(R.id.entryListView);
         entryListView.setAdapter(entryAdapter);
+
+        final TextView buttonTodayEntry = (TextView) findViewById(R.id.buttonTodayEntry);
+        buttonTodayEntry.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intentTodayEntry = new Intent(MainActivity.this, TodayEntryActivity.class);
+                intentTodayEntry.putExtra("date", "oh shit");
+                MainActivity.this.startActivity(intentTodayEntry);
+            }
+        });
 
 //        File entry_file = new File(getApplicationContext().getFilesDir(), "Dgcpcat");
 //        String entry_filename = "hello";
