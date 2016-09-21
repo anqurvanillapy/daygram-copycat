@@ -1,29 +1,18 @@
 package com.anqurvanillapy.daygramcopycat;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Adapter;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -198,11 +187,22 @@ public class MainActivity extends AppCompatActivity {
         ListView entryListView = (ListView) findViewById(R.id.entryListView);
         entryListView.setAdapter(entryAdapter);
 
+        entryListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intentEntryItemEditor = new Intent(MainActivity.this, EntryEditorActivity.class);
+                intentEntryItemEditor.putExtra("date", "20160921");
+                intentEntryItemEditor.putExtra("state", 0);
+                MainActivity.this.startActivity(intentEntryItemEditor);
+            }
+        });
+
         final TextView buttonTodayEntry = (TextView) findViewById(R.id.buttonTodayEntry);
         buttonTodayEntry.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intentEntryEditor = new Intent(MainActivity.this, EntryEditorActivity.class);
-                intentEntryEditor.putExtra("date", "oh shit");
+//                intentEntryEditor.putExtra("date", "20160921");
+//                intentEntryEditor.putExtra("state", 1);
                 MainActivity.this.startActivity(intentEntryEditor);
             }
         });

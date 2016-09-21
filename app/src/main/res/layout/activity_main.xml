@@ -124,7 +124,7 @@
                 android:layout_marginRight="10dp"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="16dp"
-                android:background="#ccc"
+                android:background="@drawable/stripes_bg"
                 android:clickable="true"
                 android:contextClickable="true"
                 android:id="@+id/buttonRandom"
