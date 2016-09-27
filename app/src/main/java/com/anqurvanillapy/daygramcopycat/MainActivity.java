@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Intent intentEntryItemEditor = new Intent(MainActivity.this, EntryEditorActivity.class);
                 intentEntryItemEditor.putExtra("date", "20160921");
-                intentEntryItemEditor.putExtra("state", 0);
+                intentEntryItemEditor.putExtra("state", EntryEditorActivity.EditorState.VIEW);
                 MainActivity.this.startActivity(intentEntryItemEditor);
             }
         });
@@ -201,8 +201,8 @@ public class MainActivity extends AppCompatActivity {
         buttonTodayEntry.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intentEntryEditor = new Intent(MainActivity.this, EntryEditorActivity.class);
-//                intentEntryEditor.putExtra("date", "20160921");
-//                intentEntryEditor.putExtra("state", 1);
+                intentEntryEditor.putExtra("date", "20160921");
+                intentEntryEditor.putExtra("state", EntryEditorActivity.EditorState.EDIT);
                 MainActivity.this.startActivity(intentEntryEditor);
             }
         });

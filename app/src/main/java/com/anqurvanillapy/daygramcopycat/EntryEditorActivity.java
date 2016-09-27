@@ -6,22 +6,31 @@ import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.FrameLayout;
+import android.widget.RelativeLayout;
 
 public class EntryEditorActivity extends AppCompatActivity {
 
-    private class EditorState {
+    public class EditorState {
         final public static int VIEW = 0;
         final public static int EDIT = 1;
     }
 
     private void editorStateHandler(Bundle extras) {
         EditText editorText = (EditText) findViewById(R.id.editorText);
+        RelativeLayout editorFooterBack = (RelativeLayout) findViewById(R.id.editorFooterBack);
+        RelativeLayout editorFooterDone = (RelativeLayout) findViewById(R.id.editorFooterDone);
 
         switch (extras.getInt("state")) {
             case EditorState.VIEW:
-                // TODO
+                editorText.setEnabled(false);
+                editorFooterDone.setVisibility(View.GONE);
+                editorFooterBack.setVisibility(View.VISIBLE);
+                break;
             case EditorState.EDIT:
-                // TODO
+                editorText.setEnabled(true);
+                editorFooterDone.setVisibility(View.VISIBLE);
+                editorFooterBack.setVisibility(View.GONE);
+                break;
         }
     }
 

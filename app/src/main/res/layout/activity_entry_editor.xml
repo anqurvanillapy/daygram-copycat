@@ -70,7 +70,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="5"
-            android:id="@+id/editorFooter"
+            android:id="@+id/editorFooterBack"
             android:gravity="center_vertical|center_horizontal">
 
             <FrameLayout
@@ -78,6 +78,49 @@
                 android:layout_height="20dp"
                 android:background="#ccc"
                 android:id="@+id/backButton"></FrameLayout>
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="5"
+            android:id="@+id/editorFooterDone"
+            android:gravity="center_vertical|center_horizontal">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical|right"
+                android:layout_marginLeft="16dp"
+                android:layout_marginRight="16dp">
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#000"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="DONE"
+                    android:id="@+id/textView"
+                    android:textColor="#000"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textSize="20sp"
+                    android:layout_marginRight="6dp"
+                    android:layout_marginLeft="6dp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#000"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+            </LinearLayout>
         </RelativeLayout>
 
     </LinearLayout>
