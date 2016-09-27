@@ -59,12 +59,11 @@
             android:id="@+id/editorText"
             android:background="@android:color/transparent"
             android:gravity="top|left"
-            android:layout_marginTop="15dp"
-            android:layout_marginLeft="50dp"
-            android:layout_marginRight="50dp"
             android:inputType="textMultiLine"
             android:layout_weight="1"
-            android:enabled="false" />
+            android:layout_marginLeft="50dp"
+            android:layout_marginRight="50dp"
+            android:layout_marginTop="15dp" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -77,23 +76,60 @@
                 android:layout_width="50dp"
                 android:layout_height="20dp"
                 android:background="#ccc"
-                android:id="@+id/backButton"></FrameLayout>
+                android:id="@+id/buttonBack"></FrameLayout>
         </RelativeLayout>
 
-        <RelativeLayout
+        <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_weight="5"
             android:id="@+id/editorFooterDone"
-            android:gravity="center_vertical|center_horizontal">
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:baselineAligned="false">
+
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:gravity="left|center_vertical">
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#000"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="TIME"
+                    android:id="@+id/buttonInsertTime"
+                    android:fontFamily="sans-serif-condensed"
+                    android:textSize="20sp"
+                    android:layout_marginRight="6dp"
+                    android:layout_marginLeft="6dp"
+                    android:textStyle="bold" />
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="#000"
+                    android:layout_marginTop="12dp"
+                    android:layout_marginBottom="12dp" />
+            </LinearLayout>
 
             <LinearLayout
                 android:orientation="horizontal"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center_vertical|right"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp">
+                android:layout_weight="1">
 
                 <View
                     android:layout_width="1dp"
@@ -106,7 +142,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="DONE"
-                    android:id="@+id/textView"
+                    android:id="@+id/buttonEditDone"
                     android:textColor="#000"
                     android:fontFamily="sans-serif-condensed"
                     android:textSize="20sp"
@@ -121,7 +157,8 @@
                     android:layout_marginTop="12dp"
                     android:layout_marginBottom="12dp" />
             </LinearLayout>
-        </RelativeLayout>
+
+        </LinearLayout>
 
     </LinearLayout>
 </RelativeLayout>
