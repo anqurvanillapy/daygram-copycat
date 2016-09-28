@@ -46,7 +46,7 @@
                 android:background="@drawable/border_bg"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:textColor="#000" />
+                android:textColor="#8b0000" />
         </LinearLayout>
 
         <RelativeLayout

@@ -24,7 +24,6 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textAppearance="?android:attr/textAppearanceLarge"
-                android:text="TUESDAY / MAY 22 / 2015"
                 android:id="@+id/editorHeaderTitle"
                 android:textSize="25sp"
                 android:fontFamily="sans-serif-condensed-light" />
@@ -59,11 +58,11 @@
             android:id="@+id/editorText"
             android:background="@android:color/transparent"
             android:gravity="top|left"
-            android:inputType="textMultiLine"
             android:layout_weight="1"
             android:layout_marginLeft="50dp"
             android:layout_marginRight="50dp"
-            android:layout_marginTop="15dp" />
+            android:layout_marginTop="15dp"
+            android:fontFamily="sans-serif-condesened" />
 
         <RelativeLayout
             android:layout_width="match_parent"
