@@ -1,6 +1,7 @@
 /**
  * FIXME:
  * - [ ] All exceptions are generalized
+ * - [ ] Item views adaption is trivial
  */
 
 package com.anqurvanillapy.daygramcopycat;
@@ -20,14 +21,8 @@ import android.widget.ListView;
 import android.widget.TextView;
 
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -37,6 +32,24 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity {
+    /**
+     * =============================================================================================
+     * Global Private Components & Variables
+     * =============================================================================================
+     */
+
+    private ListView entryListView;
+    private EntryAdapter entryAdapter;
+    private ArrayList<EntryItem> entryItems = new ArrayList<>();
+
+    Date currentLocalTime;
+    private String mainYear;
+    private String mainMonth;
+    private String mainToday;
+
+    private TextView buttonTodayEntry;
+    private TextView labelMonth;
+    private TextView labelYear;
 
     /**
      * =============================================================================================
@@ -74,32 +87,30 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public class EntryEmptyObject {
-        String name;
-
-        public EntryEmptyObject(String name) { this.name = name; }
-        public String getName() { return name; }
-    }
-
-    public class EntryEmptySundayObject {
-        String name;
-
-        public EntryEmptySundayObject(String name) { this.name = name; }
-        public String getName() { return name; }
-    }
+    public class EntryEmptyObject {}
 
     public class EntryNonemptyObject {
-        String name;
+        private String entryAbstract;
+        private String dayOfWeek;
+        private String date;
 
-        public EntryNonemptyObject(String name) { this.name = name; }
-        public String getName() { return name; }
-    }
+        public EntryNonemptyObject(String entryAbstract, String dayOfWeek, String date) {
+            this.entryAbstract = entryAbstract;
+            this.dayOfWeek = dayOfWeek;
+            this.date = date;
+        }
 
-    public class EntryNonemptySundayObject {
-        String name;
+        public String getEntryAbstract() {
+            return entryAbstract;
+        }
 
-        public EntryNonemptySundayObject(String name) { this.name = name; }
-        public String getName() { return name; }
+        public String getDayOfWeek() {
+            return dayOfWeek;
+        }
+
+        public String getDate() {
+            return date;
+        }
     }
 
     public class EntryAdapter extends BaseAdapter {
@@ -142,9 +153,9 @@ public class MainActivity extends AppCompatActivity {
             Object entryObject = null;
             entryObject = entryItems.get(position).getObject();
 
+            // FIXME: Item views adaption is trivial
             switch (getItemViewType(position)) {
                 case EntryItemType.EMPTY:
-                    EntryEmptyObject entryEmptyObject = (EntryEmptyObject) entryObject;
                     ViewHolderEntryEmpty emptyHolder;
                     if (convertView == null) {
                         convertView = inflater.inflate(R.layout.entry_adapter_empty, null, false);
@@ -154,20 +165,17 @@ public class MainActivity extends AppCompatActivity {
                         emptyHolder = (ViewHolderEntryEmpty) convertView.getTag();
                     }
 
-                    emptyHolder.getEntryEmpty().setText(entryEmptyObject.getName());
                     return convertView;
                 case EntryItemType.EMPTY_SUNDAY:
-                    EntryEmptySundayObject entryEmptySundayObject = (EntryEmptySundayObject) entryObject;
-                    ViewHolderEntryEmptySunday emptySundayHolder;
+                    ViewHolderEntryEmpty emptySundayHolder;
                     if (convertView == null) {
                         convertView = inflater.inflate(R.layout.entry_adapter_empty_red, null, false);
-                        emptySundayHolder = new ViewHolderEntryEmptySunday(convertView);
+                        emptySundayHolder = new ViewHolderEntryEmpty(convertView);
                         convertView.setTag(emptySundayHolder);
                     } else {
-                        emptySundayHolder = (ViewHolderEntryEmptySunday) convertView.getTag();
+                        emptySundayHolder = (ViewHolderEntryEmpty) convertView.getTag();
                     }
 
-                    emptySundayHolder.getEntryEmptySunday().setText(entryEmptySundayObject.getName());
                     return convertView;
                 case EntryItemType.NONEMPTY:
                     EntryNonemptyObject entryNonemptyObject = (EntryNonemptyObject) entryObject;
@@ -180,20 +188,24 @@ public class MainActivity extends AppCompatActivity {
                         nonemptyHolder = (ViewHolderEntryNonempty) convertView.getTag();
                     }
 
-                    nonemptyHolder.getEntryNonempty().setText(entryNonemptyObject.getName());
+                    nonemptyHolder.getEntryAbstract().setText(entryNonemptyObject.getEntryAbstract());
+                    nonemptyHolder.getItemDayOfWeek().setText(entryNonemptyObject.getDayOfWeek());
+                    nonemptyHolder.getItemDate().setText(entryNonemptyObject.getDate());
                     return convertView;
                 case EntryItemType.NONEMPTY_SUNDAY:
-                    EntryNonemptySundayObject entryNonemptySundayObject = (EntryNonemptySundayObject) entryObject;
-                    ViewHolderEntryNonemptySunday nonemptySundayHolder;
+                    EntryNonemptyObject entryNonemptySundayObject = (EntryNonemptyObject) entryObject;
+                    ViewHolderEntryNonempty nonemptySundayHolder;
                     if (convertView == null) {
                         convertView = inflater.inflate(R.layout.entry_adapter_red, null, false);
-                        nonemptySundayHolder = new ViewHolderEntryNonemptySunday(convertView);
+                        nonemptySundayHolder = new ViewHolderEntryNonempty(convertView);
                         convertView.setTag(nonemptySundayHolder);
                     } else {
-                        nonemptySundayHolder = (ViewHolderEntryNonemptySunday) convertView.getTag();
+                        nonemptySundayHolder = (ViewHolderEntryNonempty) convertView.getTag();
                     }
 
-                    nonemptySundayHolder.getEntryNonemptySunday().setText(entryNonemptySundayObject.getName());
+                    nonemptySundayHolder.getEntryAbstract().setText(entryNonemptySundayObject.getEntryAbstract());
+                    nonemptySundayHolder.getItemDayOfWeek().setText(entryNonemptySundayObject.getDayOfWeek());
+                    nonemptySundayHolder.getItemDate().setText(entryNonemptySundayObject.getDate());
                     return convertView;
             }
 
@@ -202,81 +214,55 @@ public class MainActivity extends AppCompatActivity {
 
         private class ViewHolderEntryEmpty {
             private View row;
-            private TextView entryEmpty;
 
             public ViewHolderEntryEmpty(View row) {
                 this.row = row;
-            }
-
-            public TextView getEntryEmpty() {
-                if (this.entryEmpty == null) {
-                    this.entryEmpty = (TextView) row.findViewById(R.id.entryEmptyLabel);
-                }
-
-                return this.entryEmpty;
-            }
-        }
-
-        private class ViewHolderEntryEmptySunday {
-            private View row;
-            private TextView entryEmptySunday;
-
-            public ViewHolderEntryEmptySunday(View row) {
-                this.row = row;
-            }
-
-            public TextView getEntryEmptySunday() {
-                if (this.entryEmptySunday == null) {
-                    this.entryEmptySunday = (TextView) row.findViewById(R.id.entryEmptyLabel);
-                }
-
-                return this.entryEmptySunday;
             }
         }
 
         private class ViewHolderEntryNonempty {
             private View row;
-            private TextView entryNonempty;
+            private TextView entryAbstract;
+            private TextView itemDayOfWeek;
+            private TextView itemDate;
 
             public ViewHolderEntryNonempty(View row) {
                 this.row = row;
             }
 
-            public TextView getEntryNonempty() {
-                if (this.entryNonempty == null) {
-                    this.entryNonempty = (TextView) row.findViewById(R.id.entryAbstract);
+            public TextView getEntryAbstract() {
+                if (this.entryAbstract == null) {
+                    this.entryAbstract = (TextView) row.findViewById(R.id.entryAbstract);
                 }
 
-                return this.entryNonempty;
-            }
-        }
-
-        private class ViewHolderEntryNonemptySunday {
-            private View row;
-            private TextView entryNonemptySunday;
-
-            public ViewHolderEntryNonemptySunday(View row) {
-                this.row = row;
+                return this.entryAbstract;
             }
 
-            public TextView getEntryNonemptySunday() {
-                if (this.entryNonemptySunday == null) {
-                    this.entryNonemptySunday = (TextView) row.findViewById(R.id.entryAbstract);
+            public TextView getItemDayOfWeek() {
+                if (this.itemDayOfWeek == null) {
+                    this.itemDayOfWeek = (TextView) row.findViewById(R.id.itemDayOfWeek);
                 }
 
-                return this.entryNonemptySunday;
+                return this.itemDayOfWeek;
+            }
+
+            public TextView getItemDate() {
+                if (this.itemDate == null) {
+                    this.itemDate = (TextView) row.findViewById(R.id.itemDate);
+                }
+
+                return this.itemDate;
             }
         }
     }
 
     /**
      * =============================================================================================
-     * ListView Item Generator
+     * ListView Item Updater
      * =============================================================================================
      */
 
-    public ArrayList<EntryItem> listItemGenerator(String year, String month) {
-        ArrayList<EntryItem> entryItems = new ArrayList<>();
+    public void listItemUpdater(String year, String month) {
         Context context = getApplicationContext();
         File entryPath = new File(context.getFilesDir(), "entries");
         File entryAbstract = new File(entryPath,
@@ -288,29 +274,34 @@ public class MainActivity extends AppCompatActivity {
 
         if (entryAbstract.exists()) {
             try {
-                JSONObject jsonAbstract = new JSONObject(loadJSONFromFile(entryAbstract));
+                LoadStringFromFile loader = new LoadStringFromFile();
+                JSONObject jsonAbstract = new JSONObject(loader.loadStringFromFile(entryAbstract));
                 String stringAbstract;
                 String key;
+                String dayOfWeek;
+                DateFormat dateFormat = new SimpleDateFormat("EE");
+
                 for (int i = 1; i <= daysInMonth; i++) {
                     cal.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
+                    dayOfWeek = dateFormat.format(cal.getTime()).toUpperCase();
                     key = String.format(year + month + "%02d", i);
 
                     if (jsonAbstract.has(key)) {
                         stringAbstract = jsonAbstract.getString(key);
                         if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
                             entryItems.add(new EntryItem(EntryItemType.NONEMPTY,
-                                    new EntryNonemptyObject(stringAbstract)));
+                                    new EntryNonemptyObject(stringAbstract, dayOfWeek, i + "")));
                         } else {
                             entryItems.add(new EntryItem(EntryItemType.NONEMPTY_SUNDAY,
-                                    new EntryNonemptySundayObject(stringAbstract)));
+                                    new EntryNonemptyObject(stringAbstract, dayOfWeek, i + "")));
                         }
                     } else {
                         if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
                             entryItems.add(new EntryItem(EntryItemType.EMPTY,
-                                    new EntryEmptyObject(year + month + i)));
+                                    new EntryEmptyObject()));
                         } else {
                             entryItems.add(new EntryItem(EntryItemType.EMPTY_SUNDAY,
-                                    new EntryEmptySundayObject(year + month + i)));
+                                    new EntryEmptyObject()));
                         }
                     }
                 }
@@ -323,42 +314,32 @@ public class MainActivity extends AppCompatActivity {
 
                 if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
                     entryItems.add(new EntryItem(EntryItemType.EMPTY,
-                            new EntryEmptyObject(year + month + i)));
+                            new EntryEmptyObject()));
                 } else {
                     entryItems.add(new EntryItem(EntryItemType.EMPTY_SUNDAY,
-                            new EntryEmptySundayObject(year + month + i)));
+                            new EntryEmptyObject()));
                 }
             }
         }
-
-        return entryItems;
     }
 
     /**
      * =============================================================================================
-     * JSON File Loader
+     * ListView Refresher (called by onResume)
      * =============================================================================================
      */
 
-     public String loadJSONFromFile(File file) {
-         int size;
-         byte[] buffer;
-         InputStream is;
-         String jsonString = null;
+    private void refreshListView() {
+        entryItems.clear();
+        listItemUpdater(mainYear, mainMonth);
 
-         try {
-             is = new FileInputStream(file);
-             size = is.available();
-             buffer = new byte[size];
-             is.read(buffer);
-             is.close();
-             jsonString = new String(buffer, "UTF-8");
-         } catch (Exception e) {
-             e.printStackTrace();
-         }
-
-         return jsonString;
-     }
+        if (entryAdapter == null) {
+            entryAdapter = new EntryAdapter(this, entryItems);
+            entryListView.setAdapter(entryAdapter);
+        } else {
+            entryAdapter.notifyDataSetChanged();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -372,62 +353,64 @@ public class MainActivity extends AppCompatActivity {
          */
 
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-        Date currentLocalTime = cal.getTime();
+        currentLocalTime = cal.getTime();
 
         DateFormat monthName = new SimpleDateFormat("MMMM");
         DateFormat month = new SimpleDateFormat("MM");
         DateFormat year = new SimpleDateFormat("yyyy");
+        DateFormat today = new SimpleDateFormat("yyyMMdd");
 
-        String currentYear = year.format(currentLocalTime);
-        String currentMonth = month.format(currentLocalTime);
+        mainYear = year.format(currentLocalTime);
+        mainMonth = month.format(currentLocalTime);
+        mainToday = today.format(currentLocalTime);
         String currentMonthName = monthName.format(currentLocalTime).toUpperCase();
 
         /**
          * =========================================================================================
-         * UI Components (w/ Initialization)
+         * UI Components Initialization
          * =========================================================================================
          */
 
-        final TextView buttonTodayEntry = (TextView) findViewById(R.id.buttonTodayEntry);
-        TextView labelMonth = (TextView) findViewById(R.id.labelMonth);
-        TextView labelYear = (TextView) findViewById(R.id.labelYear);
+        entryListView = (ListView) findViewById(R.id.entryListView);
+        buttonTodayEntry = (TextView) findViewById(R.id.buttonTodayEntry);
+        labelMonth = (TextView) findViewById(R.id.labelMonth);
+        labelYear = (TextView) findViewById(R.id.labelYear);
         labelMonth.setText(currentMonthName);
-        labelYear.setText(currentYear);
+        labelYear.setText(mainYear);
 
         /**
          * =========================================================================================
-         * ListView Handlers
-         * =========================================================================================
-         */
-
-        ArrayList<EntryItem> _entryItems = listItemGenerator(currentYear, currentMonth);
-        EntryAdapter entryAdapter = new EntryAdapter(this, _entryItems);
-        ListView entryListView = (ListView) findViewById(R.id.entryListView);
-        entryListView.setAdapter(entryAdapter);
-
-        /**
-         * =========================================================================================
-         * EventListeners
+         * Event Listeners
          * =========================================================================================
          */
 
         entryListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                EntryItem selected = (EntryItem) entryListView.getItemAtPosition(position);
+                String targetDate = mainYear + mainMonth + (position + 1);
+
                 Intent intentEntryItemEditor = new Intent(MainActivity.this, EntryEditorActivity.class);
-                intentEntryItemEditor.putExtra("date", "20160921");
+                intentEntryItemEditor.putExtra("date", targetDate);
                 intentEntryItemEditor.putExtra("state", EntryEditorActivity.EditorState.VIEW);
                 MainActivity.this.startActivity(intentEntryItemEditor);
             }
         });
 
         buttonTodayEntry.setOnClickListener(new View.OnClickListener() {
+            @Override
             public void onClick(View v) {
                 Intent intentEntryEditor = new Intent(MainActivity.this, EntryEditorActivity.class);
-                intentEntryEditor.putExtra("date", "20160921");
+                intentEntryEditor.putExtra("date", mainToday);
                 intentEntryEditor.putExtra("state", EntryEditorActivity.EditorState.EDIT);
                 MainActivity.this.startActivity(intentEntryEditor);
             }
         });
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        refreshListView();
     }
 }

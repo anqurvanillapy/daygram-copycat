@@ -1,3 +1,10 @@
+/**
+ * FIXME:
+ * - [ ] All exceptions are generalized
+ * - [ ] Ugly self-implemented error logging
+ * - [ ] Content abstract algorithm is ugly
+ */
+
 package com.anqurvanillapy.daygramcopycat;
 
 import android.content.Context;
@@ -6,28 +13,53 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
 
 public class EntryEditorActivity extends AppCompatActivity {
+
+    /**
+     * =============================================================================================
+     * Global Private Components & Variables
+     * =============================================================================================
+     */
+
+    private Bundle extras;
+
+    private File targetPath;
+    private File targetFile;
+    private String targetYear;
+    private String targetMonth;
+    private String entryFilename;
+
+    private EditText editorText;
+    private RelativeLayout editorFooterBack;
+    private LinearLayout editorFooterDone;
+    private TextView editorHeaderTitle;
+    private FrameLayout backButton;
+    private TextView buttonInsertTime;
+    private TextView buttonEditDone;
+
+    /**
+     * =============================================================================================
+     * Editor State Handlers
+     * =============================================================================================
+     */
 
     public class EditorState {
         final public static int VIEW = 0;
@@ -62,41 +94,19 @@ public class EntryEditorActivity extends AppCompatActivity {
 
         /**
          * =========================================================================================
-         * DateTime & File Handlers
-         * =========================================================================================
-         */
-
-        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
-        Date currentLocalTime = cal.getTime();
-
-        DateFormat title = new SimpleDateFormat("EEEE / MMM dd / yyyy");
-        DateFormat time = new SimpleDateFormat("HH:mm a");
-        DateFormat day = new SimpleDateFormat("yyyMMdd");
-        DateFormat month = new SimpleDateFormat("MM");
-        DateFormat year = new SimpleDateFormat("yyyy");
-
-        final String timeString = time.format(currentLocalTime) + " ";
-        String titleString = title.format(currentLocalTime).toUpperCase();
-        final String entryYear = year.format(currentLocalTime);
-        final String entryMonth = month.format(currentLocalTime);
-        final String entryFilename = day.format(currentLocalTime);
-
-        final Context context = getApplicationContext();
-        final File filesDir = context.getFilesDir();
-        final File entryPath = new File(filesDir, "entries");
-        entryPath.mkdirs();
-
-        /**
-         * =========================================================================================
          * UI Components (w/ Initialization)
          * =========================================================================================
          */
 
-        final EditText editorText = (EditText) findViewById(R.id.editorText);
-        final RelativeLayout editorFooterBack = (RelativeLayout) findViewById(R.id.editorFooterBack);
-        final LinearLayout editorFooterDone = (LinearLayout) findViewById(R.id.editorFooterDone);
+        editorHeaderTitle = (TextView) findViewById(R.id.editorHeaderTitle);
+        editorText = (EditText) findViewById(R.id.editorText);
+        editorFooterBack = (RelativeLayout) findViewById(R.id.editorFooterBack);
+        backButton = (FrameLayout) findViewById(R.id.buttonBack);
+        editorFooterDone = (LinearLayout) findViewById(R.id.editorFooterDone);
+        buttonInsertTime = (TextView) findViewById(R.id.buttonInsertTime);
+        buttonEditDone = (TextView) findViewById(R.id.buttonEditDone);
 
-        final Bundle extras = getIntent().getExtras();
+        extras = getIntent().getExtras();
         if (extras != null) {
             editorStateHandler(extras.getInt("state"),
                     editorText,
@@ -108,13 +118,61 @@ public class EntryEditorActivity extends AppCompatActivity {
             finish();
         }
 
-        TextView editorHeaderTitle = (TextView) findViewById(R.id.editorHeaderTitle);
-        editorHeaderTitle.setText(titleString);
+        /**
+         * =========================================================================================
+         * DateTime & File Handlers
+         * =========================================================================================
+         */
 
-        FrameLayout backButton = (FrameLayout) findViewById(R.id.buttonBack);
+        /* --- Current Local Time --- */
 
-        TextView buttonInsertTime = (TextView) findViewById(R.id.buttonInsertTime);
-        TextView buttonEditDone = (TextView) findViewById(R.id.buttonEditDone);
+        Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
+        Date currentLocalTime = cal.getTime();
+        DateFormat time = new SimpleDateFormat("HH:mm a");
+        final String timeString = time.format(currentLocalTime) + " ";
+
+        /* --- Target Date --- */
+
+        DateFormat targetDateFormat = new SimpleDateFormat("yyyyMMdd");
+        // TODO: Header title of Sunday is dark red
+        DateFormat title = new SimpleDateFormat("EEEE / MMMM d / yyyy");
+        Date targetDate = null;
+
+        try {
+            if (extras != null) {
+                targetDate = targetDateFormat.parse(extras.getString("date"));
+            } else {
+                targetDate = currentLocalTime;
+            }
+            String titleString = title.format(targetDate).toUpperCase();
+            editorHeaderTitle.setText(titleString);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        if (targetDate == null) {
+            targetDate = currentLocalTime;
+        }
+
+        DateFormat month = new SimpleDateFormat("MM");
+        DateFormat year = new SimpleDateFormat("yyyy");
+
+        targetYear = year.format(targetDate);
+        targetMonth = month.format(targetDate);
+        entryFilename = targetDateFormat.format(targetDate);
+
+        final Context context = getApplicationContext();
+        final File filesDir = context.getFilesDir();
+        final File entryPath = new File(filesDir, "entries");
+        entryPath.mkdirs();
+
+        targetPath = new File(entryPath, targetYear + File.separator + targetMonth);
+        targetFile = new File(targetPath, entryFilename);
+
+        if (targetFile.exists()) {
+            LoadStringFromFile loader = new LoadStringFromFile();
+            editorText.setText(loader.loadStringFromFile(targetFile));
+        }
 
         /**
          * =========================================================================================
@@ -150,6 +208,7 @@ public class EntryEditorActivity extends AppCompatActivity {
         buttonInsertTime.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // TODO: Append on cursor
                 editorText.append(timeString);
             }
         });
@@ -161,12 +220,17 @@ public class EntryEditorActivity extends AppCompatActivity {
                 if (entryTextString.isEmpty()) {
                     finish();
                 } else {
-                    File entryMonthPath = new File(entryPath, entryYear + File.separator + entryMonth);
-                    entryMonthPath.mkdirs();
-                    File entryFile = new File(entryMonthPath, entryFilename);
-                    File entryAbstract = new File(entryMonthPath, "abstract");
+                    targetPath.mkdirs();
+                    File entryFile = new File(targetPath, entryFilename);
+                    File entryAbstract = new File(targetPath, "abstract");
+                    JSONObject jsonAbstract = null;
 
                     try {
+                        if (entryAbstract.exists()) {
+                            LoadStringFromFile loader = new LoadStringFromFile();
+                            jsonAbstract = new JSONObject(loader.loadStringFromFile(entryAbstract));
+                        }
+
                         entryFile.createNewFile();
                         OutputStream osFile = new FileOutputStream(entryFile);
                         osFile.write(entryTextString.getBytes());
@@ -176,9 +240,11 @@ public class EntryEditorActivity extends AppCompatActivity {
                     }
 
                     try {
-                        JSONObject jsonAbstract = new JSONObject();
+                        if (jsonAbstract == null) {
+                            jsonAbstract = new JSONObject();
+                        }
 
-                        // FIXME: This string shortening algorithm is ugly
+                        // FIXME: This content abstract algorithm is ugly
                         if (entryTextString.length() > 50) {
                             String stringAbstract = entryTextString.substring(0, 50);
 

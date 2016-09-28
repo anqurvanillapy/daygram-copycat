@@ -8,12 +8,6 @@
         android:layout_height="45dp"
         android:gravity="center_vertical|center_horizontal">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:id="@+id/entryEmptyLabel"
-            android:textColor="@android:color/transparent" />
-
         <FrameLayout
             android:layout_width="15dp"
             android:layout_height="15dp"
