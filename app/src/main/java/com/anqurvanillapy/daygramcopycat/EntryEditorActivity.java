@@ -2,7 +2,6 @@
  * FIXME:
  * - [ ] All exceptions are generalized
  * - [ ] Ugly self-implemented error logging
- * - [ ] Content abstract algorithm is ugly
  */
 
 package com.anqurvanillapy.daygramcopycat;
@@ -19,6 +18,7 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
@@ -45,7 +45,7 @@ public class EntryEditorActivity extends AppCompatActivity {
     private File targetFile;
     private String targetYear;
     private String targetMonth;
-    private String entryFilename;
+    private String targetDateString;
 
     private EditText editorText;
     private RelativeLayout editorFooterBack;
@@ -159,7 +159,7 @@ public class EntryEditorActivity extends AppCompatActivity {
 
         targetYear = year.format(targetDate);
         targetMonth = month.format(targetDate);
-        entryFilename = targetDateFormat.format(targetDate);
+        targetDateString = targetDateFormat.format(targetDate);
 
         final Context context = getApplicationContext();
         final File filesDir = context.getFilesDir();
@@ -167,11 +167,16 @@ public class EntryEditorActivity extends AppCompatActivity {
         entryPath.mkdirs();
 
         targetPath = new File(entryPath, targetYear + File.separator + targetMonth);
-        targetFile = new File(targetPath, entryFilename);
+        targetFile = new File(targetPath, "thorough");
 
         if (targetFile.exists()) {
             LoadStringFromFile loader = new LoadStringFromFile();
-            editorText.setText(loader.loadStringFromFile(targetFile));
+            try {
+                editorText.setText(new JSONObject(loader.loadStringFromFile(targetFile))
+                        .getString(targetDateString));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
 
         /**
@@ -221,46 +226,22 @@ public class EntryEditorActivity extends AppCompatActivity {
                     finish();
                 } else {
                     targetPath.mkdirs();
-                    File entryFile = new File(targetPath, entryFilename);
-                    File entryAbstract = new File(targetPath, "abstract");
-                    JSONObject jsonAbstract = null;
+                    JSONObject jsonThorough = null;
 
                     try {
-                        if (entryAbstract.exists()) {
+                        if (targetFile.exists()) {
                             LoadStringFromFile loader = new LoadStringFromFile();
-                            jsonAbstract = new JSONObject(loader.loadStringFromFile(entryAbstract));
+                            jsonThorough = new JSONObject(loader.loadStringFromFile(targetFile));
                         }
 
-                        entryFile.createNewFile();
-                        OutputStream osFile = new FileOutputStream(entryFile);
-                        osFile.write(entryTextString.getBytes());
-                        osFile.close();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-
-                    try {
-                        if (jsonAbstract == null) {
-                            jsonAbstract = new JSONObject();
+                        if (jsonThorough == null) {
+                            jsonThorough = new JSONObject();
                         }
 
-                        // FIXME: This content abstract algorithm is ugly
-                        if (entryTextString.length() > 50) {
-                            String stringAbstract = entryTextString.substring(0, 50);
-
-                            if (stringAbstract.contains(" ")) {
-                                stringAbstract = stringAbstract.substring(0,
-                                        stringAbstract.lastIndexOf(" "));
-                            }
-
-                            jsonAbstract.put(entryFilename, stringAbstract + " ...");
-                        } else {
-                            jsonAbstract.put(entryFilename, entryTextString);
-                        }
-
-                        OutputStream osAbstract = new FileOutputStream(entryAbstract);
-                        osAbstract.write(jsonAbstract.toString().getBytes());
-                        osAbstract.close();
+                        jsonThorough.put(targetDateString, entryTextString);
+                        OutputStream osThorough = new FileOutputStream(targetFile);
+                        osThorough.write(jsonThorough.toString().getBytes());
+                        osThorough.close();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }

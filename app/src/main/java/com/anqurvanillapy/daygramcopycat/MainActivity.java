@@ -2,6 +2,10 @@
  * FIXME:
  * - [ ] All exceptions are generalized
  * - [ ] Item views adaption is trivial
+ * - [ ] Accesses of methods
+ * - [ ] Content abstract algorithm is not desirable
+ * TODO:
+ * - [ ] Spannable is decent for colorful parts in TextView
  */
 
 package com.anqurvanillapy.daygramcopycat;
@@ -9,8 +13,13 @@ package com.anqurvanillapy.daygramcopycat;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Html;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import org.json.JSONObject;
@@ -38,6 +48,8 @@ public class MainActivity extends AppCompatActivity {
      * =============================================================================================
      */
 
+    private boolean mainState;
+
     private ListView entryListView;
     private EntryAdapter entryAdapter;
     private ArrayList<EntryItem> entryItems = new ArrayList<>();
@@ -47,9 +59,21 @@ public class MainActivity extends AppCompatActivity {
     private String mainMonth;
     private String mainToday;
 
-    private TextView buttonTodayEntry;
     private TextView labelMonth;
     private TextView labelYear;
+    private TextView buttonTodayEntry;
+    private RelativeLayout buttonMonthly;
+
+    /**
+     * =============================================================================================
+     * Main Activity States
+     * =============================================================================================
+     */
+
+    public class MainState {
+        final public static boolean ABSTRACT = false;
+        final public static boolean THOROUGH = true;
+    }
 
     /**
      * =============================================================================================
@@ -62,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         final public static int EMPTY_SUNDAY = 1;
         final public static int NONEMPTY = 2;
         final public static int NONEMPTY_SUNDAY = 3;
+        final public static int THOROUGH = 4;
     }
 
     public class EntryItem {
@@ -113,6 +138,24 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public class EntryThoroughObject {
+        private String entryThorough;
+
+        public EntryThoroughObject(String entryThorough, String dayOfWeek, String date) {
+            // TODO: Spannable is decent
+            if (dayOfWeek.equals("Sunday")) {
+                this.entryThorough = String.format("<b>%s <font color=\"#B80000\">%s</font> /</b> %s",
+                        date, dayOfWeek, entryThorough);
+            } else {
+                this.entryThorough = String.format("<b>%s %s /</b> %s", date, dayOfWeek, entryThorough);
+            }
+        }
+
+        public String getEntryThorough() {
+            return entryThorough;
+        }
+    }
+
     public class EntryAdapter extends BaseAdapter {
         Activity activity;
         ArrayList<EntryItem> entryItems;
@@ -144,7 +187,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getViewTypeCount() {
-            return 4;
+            return 5;
         }
 
         @Override
@@ -207,6 +250,20 @@ public class MainActivity extends AppCompatActivity {
                     nonemptySundayHolder.getItemDayOfWeek().setText(entryNonemptySundayObject.getDayOfWeek());
                     nonemptySundayHolder.getItemDate().setText(entryNonemptySundayObject.getDate());
                     return convertView;
+                case EntryItemType.THOROUGH:
+                    EntryThoroughObject entryThoroughObject = (EntryThoroughObject) entryObject;
+                    ViewHolderEntryThorough thoroughHolder;
+                    if (convertView == null) {
+                        convertView = inflater.inflate(R.layout.entry_adapter_thorough, null, false);
+                        thoroughHolder = new ViewHolderEntryThorough(convertView);
+                        convertView.setTag(thoroughHolder);
+                    } else {
+                        thoroughHolder = (ViewHolderEntryThorough) convertView.getTag();
+                    }
+
+                    thoroughHolder.getEntryThorough().setText(
+                            Html.fromHtml(entryThoroughObject.getEntryThorough()));
+                    return convertView;
             }
 
             return null;
@@ -254,6 +311,22 @@ public class MainActivity extends AppCompatActivity {
                 return this.itemDate;
             }
         }
+
+        private class ViewHolderEntryThorough {
+            private View row;
+            private TextView entryThorough;
+            public ViewHolderEntryThorough(View row) {
+                this.row = row;
+            }
+
+            public TextView getEntryThorough() {
+                if (this.entryThorough == null) {
+                    this.entryThorough = (TextView) row.findViewById(R.id.entryThorough);
+                }
+
+                return this.entryThorough;
+            }
+        }
     }
 
     /**
@@ -265,43 +338,64 @@ public class MainActivity extends AppCompatActivity {
     public void listItemUpdater(String year, String month) {
         Context context = getApplicationContext();
         File entryPath = new File(context.getFilesDir(), "entries");
-        File entryAbstract = new File(entryPath,
-                year+ File.separator + month + File.separator + "abstract");
+        File entryThorough = new File(entryPath,
+                year+ File.separator + month + File.separator + "thorough");
         entryPath.mkdirs();
 
         Calendar cal = new GregorianCalendar(Integer.parseInt(year), Integer.parseInt(month) - 1, 1);
         int daysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
 
-        if (entryAbstract.exists()) {
+        if (entryThorough.exists()) {
             try {
                 LoadStringFromFile loader = new LoadStringFromFile();
-                JSONObject jsonAbstract = new JSONObject(loader.loadStringFromFile(entryAbstract));
-                String stringAbstract;
+                JSONObject jsonThorough = new JSONObject(loader.loadStringFromFile(entryThorough));
+                String stringThoroughBuffer;
                 String key;
                 String dayOfWeek;
                 DateFormat dateFormat = new SimpleDateFormat("EE");
+                DateFormat dateFormatFull = new SimpleDateFormat("EEEE");
 
                 for (int i = 1; i <= daysInMonth; i++) {
                     cal.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
-                    dayOfWeek = dateFormat.format(cal.getTime()).toUpperCase();
                     key = String.format(year + month + "%02d", i);
 
-                    if (jsonAbstract.has(key)) {
-                        stringAbstract = jsonAbstract.getString(key);
-                        if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-                            entryItems.add(new EntryItem(EntryItemType.NONEMPTY,
-                                    new EntryNonemptyObject(stringAbstract, dayOfWeek, i + "")));
+                    if (mainState == MainState.ABSTRACT) {
+                        dayOfWeek = dateFormat.format(cal.getTime()).toUpperCase();
+                        if (jsonThorough.has(key)) {
+                            stringThoroughBuffer = jsonThorough.getString(key);
+
+                            if (stringThoroughBuffer.length() > 50) {
+                                // Thorough string becomes abstracted
+                                stringThoroughBuffer = stringThoroughBuffer.substring(0, 50);
+
+                                if (stringThoroughBuffer.contains(" ")) {
+                                    stringThoroughBuffer = stringThoroughBuffer.substring(0,
+                                            stringThoroughBuffer.lastIndexOf(" ")) + " ...";
+                                }
+                            }
+
+                            if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                                entryItems.add(new EntryItem(EntryItemType.NONEMPTY,
+                                        new EntryNonemptyObject(stringThoroughBuffer, dayOfWeek, i + "")));
+                            } else {
+                                entryItems.add(new EntryItem(EntryItemType.NONEMPTY_SUNDAY,
+                                        new EntryNonemptyObject(stringThoroughBuffer, dayOfWeek, i + "")));
+                            }
                         } else {
-                            entryItems.add(new EntryItem(EntryItemType.NONEMPTY_SUNDAY,
-                                    new EntryNonemptyObject(stringAbstract, dayOfWeek, i + "")));
+                            if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                                entryItems.add(new EntryItem(EntryItemType.EMPTY,
+                                        new EntryEmptyObject()));
+                            } else {
+                                entryItems.add(new EntryItem(EntryItemType.EMPTY_SUNDAY,
+                                        new EntryEmptyObject()));
+                            }
                         }
                     } else {
-                        if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-                            entryItems.add(new EntryItem(EntryItemType.EMPTY,
-                                    new EntryEmptyObject()));
-                        } else {
-                            entryItems.add(new EntryItem(EntryItemType.EMPTY_SUNDAY,
-                                    new EntryEmptyObject()));
+                        dayOfWeek = dateFormatFull.format(cal.getTime());
+                        if (jsonThorough.has(key)) {
+                            stringThoroughBuffer = jsonThorough.getString(key);
+                            entryItems.add(new EntryItem(EntryItemType.THOROUGH,
+                                    new EntryThoroughObject(stringThoroughBuffer, dayOfWeek, i + "")));
                         }
                     }
                 }
@@ -309,15 +403,17 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         } else {
-            for (int i = 1; i <= daysInMonth; i++) {
-                cal.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
+            if (mainState == MainState.ABSTRACT) {
+                for (int i = 1; i <= daysInMonth; i++) {
+                    cal.set(Integer.parseInt(year), Integer.parseInt(month) - 1, i);
 
-                if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
-                    entryItems.add(new EntryItem(EntryItemType.EMPTY,
-                            new EntryEmptyObject()));
-                } else {
-                    entryItems.add(new EntryItem(EntryItemType.EMPTY_SUNDAY,
-                            new EntryEmptyObject()));
+                    if (cal.get(Calendar.DAY_OF_WEEK) != Calendar.SUNDAY) {
+                        entryItems.add(new EntryItem(EntryItemType.EMPTY,
+                                new EntryEmptyObject()));
+                    } else {
+                        entryItems.add(new EntryItem(EntryItemType.EMPTY_SUNDAY,
+                                new EntryEmptyObject()));
+                    }
                 }
             }
         }
@@ -325,7 +421,7 @@ public class MainActivity extends AppCompatActivity {
 
     /**
      * =============================================================================================
-     * ListView Refresher (called by onResume)
+     * ListView Refresher (called by onResume, etc.)
      * =============================================================================================
      */
 
@@ -371,12 +467,15 @@ public class MainActivity extends AppCompatActivity {
          * =========================================================================================
          */
 
+        mainState = MainState.ABSTRACT;
+
         entryListView = (ListView) findViewById(R.id.entryListView);
-        buttonTodayEntry = (TextView) findViewById(R.id.buttonTodayEntry);
         labelMonth = (TextView) findViewById(R.id.labelMonth);
         labelYear = (TextView) findViewById(R.id.labelYear);
         labelMonth.setText(currentMonthName);
         labelYear.setText(mainYear);
+        buttonTodayEntry = (TextView) findViewById(R.id.buttonTodayEntry);
+        buttonMonthly = (RelativeLayout) findViewById(R.id.buttonMonthly);
 
         /**
          * =========================================================================================
@@ -404,6 +503,14 @@ public class MainActivity extends AppCompatActivity {
                 intentEntryEditor.putExtra("date", mainToday);
                 intentEntryEditor.putExtra("state", EntryEditorActivity.EditorState.EDIT);
                 MainActivity.this.startActivity(intentEntryEditor);
+            }
+        });
+
+        buttonMonthly.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mainState = !mainState;
+                refreshListView();
             }
         });
     }
