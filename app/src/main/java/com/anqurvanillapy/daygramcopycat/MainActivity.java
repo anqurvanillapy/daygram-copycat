@@ -6,27 +6,31 @@
  * - [ ] Content abstract algorithm is not desirable
  * TODO:
  * - [ ] Spannable is decent for colorful parts in TextView
+ * - [ ] Entry editor header title color
  */
 
 package com.anqurvanillapy.daygramcopycat;
 
 import android.app.Activity;
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
+import android.app.Dialog;
+import android.app.DialogFragment;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
-import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Html;
-import android.text.Spannable;
-import android.text.SpannableString;
-import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.DatePicker;
 import android.widget.ListView;
+import android.widget.NumberPicker;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -34,6 +38,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.text.DateFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -339,7 +344,7 @@ public class MainActivity extends AppCompatActivity {
         Context context = getApplicationContext();
         File entryPath = new File(context.getFilesDir(), "entries");
         File entryThorough = new File(entryPath,
-                year+ File.separator + month + File.separator + "thorough");
+                year + File.separator + month + File.separator + "thorough");
         entryPath.mkdirs();
 
         Calendar cal = new GregorianCalendar(Integer.parseInt(year), Integer.parseInt(month) - 1, 1);
@@ -349,7 +354,7 @@ public class MainActivity extends AppCompatActivity {
             try {
                 LoadStringFromFile loader = new LoadStringFromFile();
                 JSONObject jsonThorough = new JSONObject(loader.loadStringFromFile(entryThorough));
-                String stringThoroughBuffer;
+                String stringThoroughBuffer = null;
                 String key;
                 String dayOfWeek;
                 DateFormat dateFormat = new SimpleDateFormat("EE");
@@ -437,6 +442,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * =============================================================================================
+     * Month & Year Handler (Picker, Refresher, etc.)
+     * =============================================================================================
+     */
+
+    private void callMonthYearPicker(DatePickerDialog.OnDateSetListener listener) {
+        MonthYearPicker picker = new MonthYearPicker();
+        picker.setListener(listener);
+        picker.show(getFragmentManager(), "Pick a Month or Year");
+    }
+
+    private void refreshMonthYearLabel() {
+        DateFormat fromMonth = new SimpleDateFormat("MM");
+        DateFormat toMonth = new SimpleDateFormat("MMMM");
+        String month = null;
+
+        try {
+            month = toMonth.format(fromMonth.parse(mainMonth)).toUpperCase();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        labelMonth.setText(month);
+        labelYear.setText(mainYear);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -451,7 +483,6 @@ public class MainActivity extends AppCompatActivity {
         Calendar cal = Calendar.getInstance(TimeZone.getTimeZone("GMT+8:00"));
         currentLocalTime = cal.getTime();
 
-        DateFormat monthName = new SimpleDateFormat("MMMM");
         DateFormat month = new SimpleDateFormat("MM");
         DateFormat year = new SimpleDateFormat("yyyy");
         DateFormat today = new SimpleDateFormat("yyyMMdd");
@@ -459,7 +490,6 @@ public class MainActivity extends AppCompatActivity {
         mainYear = year.format(currentLocalTime);
         mainMonth = month.format(currentLocalTime);
         mainToday = today.format(currentLocalTime);
-        String currentMonthName = monthName.format(currentLocalTime).toUpperCase();
 
         /**
          * =========================================================================================
@@ -472,8 +502,7 @@ public class MainActivity extends AppCompatActivity {
         entryListView = (ListView) findViewById(R.id.entryListView);
         labelMonth = (TextView) findViewById(R.id.labelMonth);
         labelYear = (TextView) findViewById(R.id.labelYear);
-        labelMonth.setText(currentMonthName);
-        labelYear.setText(mainYear);
+        refreshMonthYearLabel();
         buttonTodayEntry = (TextView) findViewById(R.id.buttonTodayEntry);
         buttonMonthly = (RelativeLayout) findViewById(R.id.buttonMonthly);
 
@@ -511,6 +540,21 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 mainState = !mainState;
                 refreshListView();
+            }
+        });
+
+        labelMonth.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callMonthYearPicker(new DatePickerDialog.OnDateSetListener() {
+                    @Override
+                    public void onDateSet(DatePicker view, int year, int month, int day) {
+                        mainYear = year + "";
+                        mainMonth = String.format("%02d", month);
+                        refreshMonthYearLabel();
+                        refreshListView();
+                    }
+                });
             }
         });
     }

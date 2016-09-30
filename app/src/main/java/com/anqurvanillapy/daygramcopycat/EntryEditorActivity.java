@@ -62,8 +62,8 @@ public class EntryEditorActivity extends AppCompatActivity {
      */
 
     public class EditorState {
-        final public static int VIEW = 0;
-        final public static int EDIT = 1;
+        public static final int VIEW = 0;
+        public static final int EDIT = 1;
     }
 
     private void editorStateHandler(int state,
